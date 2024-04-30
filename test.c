@@ -18,7 +18,7 @@ int main(void)
     str2[STR_LEN / 10] = '\0';
 
     printf("strlen1 = %d\n",strlen(str1));
-    printf("strlen2 = %d\n",strlen(str2));
     free(str1);
+    printf("strlen2 = %d\n",strlen(str2));
     free(str2);
 }

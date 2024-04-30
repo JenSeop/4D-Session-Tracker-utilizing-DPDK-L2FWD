@@ -2,55 +2,47 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define STR_LEN 20000000
+#define DEPTH_LEN 20000000
 
 char *depth_01;
 char *depth_02;
+char *depth_03;
+char *depth_04;
 
-void depth_01_init()
+void depth_init(char *depth, int sep)
 {
-    depth_01 = (char*)malloc(STR_LEN * sizeof(char));
+    int len = DEPTH_LEN;
+    for(int cnt = sep - 1; cnt; cnt--)
+        len /= 2;
 
-    for(int idx = 0; idx < STR_LEN; idx++)
-        depth_01[idx] = 'a';
+    depth = (char*)malloc(len * sizeof(char));
+
+    for(int idx = 0; idx < len; idx++)
+        depth[idx] = 'a';
     
-    depth_01[STR_LEN] = '\0';
+    depth[len] = '\0';
     
-    printf("depth_01_init = %d\n",strlen(depth_01));
+    printf("depth_%.2d_init = %d\n",sep,strlen(depth));
 }
 
-void depth_01_free()
+void depth_free(char *depth, int sep)
 {
-    free(depth_01);
-    printf("depth_01_free\n");
-}
-
-void depth_02_init()
-{
-    depth_02 = (char*)malloc((STR_LEN / 2) * sizeof(char));
-
-    for(int idx = 0; idx < (STR_LEN / 2); idx++)
-        depth_02[idx] = 'a';
-
-    depth_02[STR_LEN / 2] = '\0';
-    
-    printf("depth_02_init = %d\n",strlen(depth_02));
-}
-
-void depth_02_free()
-{
-    free(depth_02);
-    printf("depth_02_free\n");
+    free(depth);
+    printf("depth_%.2d_free\n",sep);
 }
 
 int main(void)
 {
     // INIT
-    depth_01_init();
-    depth_02_init();
+    depth_init(depth_01, 1);
+    depth_init(depth_02, 2);
+    depth_init(depth_03, 3);
+    depth_init(depth_04, 4);
     // FREE
-    depth_01_free();
-    depth_02_free();
+    depth_free(depth_01, 1);
+    depth_free(depth_02, 2);
+    depth_free(depth_03, 3);
+    depth_free(depth_04, 4);
 
     return 0;
 }

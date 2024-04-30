@@ -31,16 +31,30 @@ Tuples {
 
 typedef struct
 HashTables {
-    uint32_t session_cnt;
+    uint32_t used;
     Tuples tuple;
     Traffics traffic;
-
 } HashTables;
 
 HashTables *depth_01;
 HashTables *depth_02;
 HashTables *depth_03;
 HashTables *depth_04;
+
+static uint32_t
+nstek_hash(Tuples entry, int num_of_depth)
+{
+    uint32_t hash = 5381;
+
+    hash = ((hash << (4 + num_of_depth)) + hash) ^ (entry.ip_01 << 24) ^ (entry.ip_02 << 24);
+    hash = ((hash << (4 + num_of_depth)) + hash) ^ (entry.ip_01 << 16) ^ (entry.ip_02 << 16);
+    hash = ((hash << (4 + num_of_depth)) + hash) ^ (entry.ip_01 << 8) ^ (entry.ip_02 << 8);
+    hash = ((hash << (4 + num_of_depth)) + hash) ^ (entry.ip_01 << 0) ^ (entry.ip_02 << 0);
+    hash = ((hash << (4 + num_of_depth)) + hash) ^ (entry.port_01) ^ (entry.protocol);
+    hash = ((hash << (4 + num_of_depth)) + hash) ^ (entry.port_02) ^ (entry.protocol);
+
+    return hash % NSTEK_DEPTH_CH(num_of_depth);
+}
 
 static int
 nstek_compare_session(Tuples entry, Tuples existence)
@@ -124,6 +138,12 @@ int main(void)
 {
     nstek_all_depth_init();
     nstek_all_depth_free();
+
+    Tuples tuple = {3232235521, 3232235522, 1024, 1025, 6};
+    printf("return = %d\n",nstek_hash(tuple, 1));
+    printf("return = %d\n",nstek_hash(tuple, 2));
+    printf("return = %d\n",nstek_hash(tuple, 3));
+    printf("return = %d\n",nstek_hash(tuple, 4));
 
     return 0;
 }

@@ -45,8 +45,12 @@ void nstek_target_depth_init(HashTables *ptr_of_depth, int num_of_depth)
     ptr_of_depth = (HashTables*)malloc(DEPTH_CH(num_of_depth) * sizeof(HashTables));
     if(ptr_of_depth == NULL)
     {
-        printf("[NSTEK] DEPTH_%d[%d] Memory allocation failed.\n", num_of_depth, DEPTH_CH(num_of_depth));
+        printf("[NSTEK] DEPTH_%.2d[%.8d] Memory allocation failed.\n", num_of_depth, DEPTH_CH(num_of_depth));
         exit(1);
+    }
+    else
+    {
+        printf("[NSTEK] DEPTH_%.2d[%.8d] Memory allocation successful.\n",num_of_depth, DEPTH_CH(num_of_depth));
     }
 }
 
@@ -61,7 +65,7 @@ void nstek_all_depth_init()
 void nstek_target_depth_free(HashTables *depth, int num_of_depth)
 {
     free(depth);
-    printf("[NSTEK] DEPTH_%d[%d] Memory deallocation successful.\n",num_of_depth, DEPTH_CH(num_of_depth));
+    printf("[NSTEK] DEPTH_%.2d[%.8d] Memory deallocation successful.\n",num_of_depth, DEPTH_CH(num_of_depth));
 }
 
 void nstek_all_depth_free()

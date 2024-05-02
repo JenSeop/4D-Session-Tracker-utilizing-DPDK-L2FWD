@@ -72,6 +72,8 @@ HashTables **hash_table;
               percentage = 1.2%
     
     DEPTH AVERAGE COLLISION PERCENT 0.55% 
+
+    240502 - 652M - 4D - 0.0026605151864667435
 */
 
 static uint32_t
@@ -209,37 +211,42 @@ nstek_hash_table_free()
 
 int main(void)
 {
-    int hash_index = 0;
 
     nstek_hash_table_init();
 
-    Tuples tuple1 = {16843009, 16843010, 1024, 1025, 6};
-    Traffics traffic = {4, 4, 4};
+    for(int idx = 0; idx < 255; idx++)
+    {
+        Tuples tuple1 = {16843008 + idx, 16843011 + idx, 1024, 1025, 6};
+        Traffics traffic = {4, 4, 4};
+        nstek_packet_to_session(tuple1, traffic, NSTEK_DEPTH_01);
+    }
 
-    hash_index = nstek_packet_to_session(tuple1, traffic, NSTEK_DEPTH_01);
-    printf(
-        "%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
-        hash_table[NSTEK_DEPTH_01][hash_index].tuple.src_addr,
-        hash_table[NSTEK_DEPTH_01][hash_index].tuple.dst_addr,
-        hash_table[NSTEK_DEPTH_01][hash_index].tuple.src_port,
-        hash_table[NSTEK_DEPTH_01][hash_index].tuple.dst_port,
-        hash_table[NSTEK_DEPTH_01][hash_index].tuple.protocol,
-        hash_table[NSTEK_DEPTH_01][hash_index].traffic.tx,
-        hash_table[NSTEK_DEPTH_01][hash_index].traffic.rx,
-        hash_table[NSTEK_DEPTH_01][hash_index].traffic.dr
-    );
-    hash_index = nstek_packet_to_session(tuple1, traffic, NSTEK_DEPTH_01);
-    printf(
-        "%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
-        hash_table[NSTEK_DEPTH_01][hash_index].tuple.src_addr,
-        hash_table[NSTEK_DEPTH_01][hash_index].tuple.dst_addr,
-        hash_table[NSTEK_DEPTH_01][hash_index].tuple.src_port,
-        hash_table[NSTEK_DEPTH_01][hash_index].tuple.dst_port,
-        hash_table[NSTEK_DEPTH_01][hash_index].tuple.protocol,
-        hash_table[NSTEK_DEPTH_01][hash_index].traffic.tx,
-        hash_table[NSTEK_DEPTH_01][hash_index].traffic.rx,
-        hash_table[NSTEK_DEPTH_01][hash_index].traffic.dr
-    );
+
+    for(int idx = 0; idx < 55; idx++)
+    {
+        Tuples tuple1 = {16843008 + idx, 16843011 + idx, 1024, 1025, 6};
+        Traffics traffic = {4, 4, 4};
+        nstek_packet_to_session(tuple1, traffic, NSTEK_DEPTH_01);
+    }
+
+    for(int depth = 0; depth < NSTEK_DEPTH; depth++)
+    {
+        printf("DEPTH %d-------------------------------------------------------------\n",depth+1);
+        for(int hash_index = 0; hash_index < NSTEK_DEPTH_LN_CH(depth); hash_index++)
+            if(hash_table[depth][hash_index].used)
+                printf(
+                    "%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
+                    hash_index,
+                    hash_table[NSTEK_DEPTH_01][hash_index].tuple.src_addr,
+                    hash_table[NSTEK_DEPTH_01][hash_index].tuple.dst_addr,
+                    hash_table[NSTEK_DEPTH_01][hash_index].tuple.src_port,
+                    hash_table[NSTEK_DEPTH_01][hash_index].tuple.dst_port,
+                    hash_table[NSTEK_DEPTH_01][hash_index].tuple.protocol,
+                    hash_table[NSTEK_DEPTH_01][hash_index].traffic.tx,
+                    hash_table[NSTEK_DEPTH_01][hash_index].traffic.rx,
+                    hash_table[NSTEK_DEPTH_01][hash_index].traffic.dr
+                );
+    }
 
     nstek_hash_table_free();
 }

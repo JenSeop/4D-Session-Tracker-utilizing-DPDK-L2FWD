@@ -109,6 +109,59 @@ nstek_compare_session(Tuples entry, Tuples existence)
 }
 
 static void
+nstek_traffic_distributor(int depth, uint32_t hash_index, Traffics traffic)
+{
+    hash_table[depth][hash_index].traffic.tx += traffic.tx;
+    hash_table[depth][hash_index].traffic.rx += traffic.rx;
+    hash_table[depth][hash_index].traffic.dr += traffic.dr;
+}
+
+static void
+nstek_tuple_distributor(int depth, uint32_t hash_index, Tuples tuple)
+{
+    hash_table[depth][hash_index].tuple.src_addr = tuple.src_addr;
+    hash_table[depth][hash_index].tuple.dst_addr = tuple.dst_addr;
+    hash_table[depth][hash_index].tuple.src_port = tuple.src_port;
+    hash_table[depth][hash_index].tuple.dst_port = tuple.dst_port;
+    hash_table[depth][hash_index].tuple.protocol = tuple.protocol;
+}
+
+static int
+nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
+{
+    uint32_t hash_index = nstek_hash(tuple, depth);
+
+    if(depth > NSTEK_DEPTH)
+    {
+        printf("[NSTEK] HASH_TABLE_DEPTH is limitted %d.\n",NSTEK_DEPTH);
+        return 0;
+    }
+
+    if(hash_table[depth][hash_index].used != 0)
+    {
+        if(nstek_compare_session(tuple, hash_table[depth][hash_index].tuple))
+        {
+            hash_table[depth][hash_index].used += 1;
+            nstek_traffic_distributor(depth, hash_index, traffic);
+        }
+        else
+        {
+            hash_index = nstek_packet_to_session(tuple, traffic, depth + 1);
+            if(hash_index == 0)
+                return 0;
+        }
+    }
+    else
+    {
+        hash_table[depth][hash_index].used = 1;
+        nstek_tuple_distributor(depth, hash_index, tuple);
+        nstek_traffic_distributor(depth, hash_index, traffic);
+    }
+    
+    return hash_index;
+}
+
+static void
 nstek_hash_table_init()
 {
     int depth;
@@ -156,30 +209,37 @@ nstek_hash_table_free()
 
 int main(void)
 {
-    uint32_t hashes[255 * 255] = {0, };
-    int collision = 0;
+    int hash_index = 0;
 
     nstek_hash_table_init();
-    nstek_hash_table_free();
-
-    for(int idx = 0; idx < (255 * 255); idx++)
-    {
-        Tuples tuple1 = {16843009 + idx, 16843010 + idx, 1024, 1025, 6};
-        hashes[idx] = nstek_hash(tuple1, NSTEK_DEPTH_04);
-
-        for(int jdx = 0; jdx < idx; jdx++)
-            if(hashes[idx] == hashes[jdx])
-            {
-                collision++;
-            }
-    }
 
     Tuples tuple1 = {16843009, 16843010, 1024, 1025, 6};
-    Tuples tuple2 = {16843010, 16843009, 1024, 1025, 6};
+    Traffics traffic = {4, 4, 4};
+
+    hash_index = nstek_packet_to_session(tuple1, traffic, NSTEK_DEPTH_01);
     printf(
-        "same session, same hash = %s\n",
-        nstek_hash(tuple2, NSTEK_DEPTH_04) == nstek_hash(tuple1, NSTEK_DEPTH_04) ? "yes" : "no"
+        "%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
+        hash_table[NSTEK_DEPTH_01][hash_index].tuple.src_addr,
+        hash_table[NSTEK_DEPTH_01][hash_index].tuple.dst_addr,
+        hash_table[NSTEK_DEPTH_01][hash_index].tuple.src_port,
+        hash_table[NSTEK_DEPTH_01][hash_index].tuple.dst_port,
+        hash_table[NSTEK_DEPTH_01][hash_index].tuple.protocol,
+        hash_table[NSTEK_DEPTH_01][hash_index].traffic.tx,
+        hash_table[NSTEK_DEPTH_01][hash_index].traffic.rx,
+        hash_table[NSTEK_DEPTH_01][hash_index].traffic.dr
+    );
+    hash_index = nstek_packet_to_session(tuple1, traffic, NSTEK_DEPTH_01);
+    printf(
+        "%d\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
+        hash_table[NSTEK_DEPTH_01][hash_index].tuple.src_addr,
+        hash_table[NSTEK_DEPTH_01][hash_index].tuple.dst_addr,
+        hash_table[NSTEK_DEPTH_01][hash_index].tuple.src_port,
+        hash_table[NSTEK_DEPTH_01][hash_index].tuple.dst_port,
+        hash_table[NSTEK_DEPTH_01][hash_index].tuple.protocol,
+        hash_table[NSTEK_DEPTH_01][hash_index].traffic.tx,
+        hash_table[NSTEK_DEPTH_01][hash_index].traffic.rx,
+        hash_table[NSTEK_DEPTH_01][hash_index].traffic.dr
     );
 
-    printf("collision = %d\n",collision);
+    nstek_hash_table_free();
 }

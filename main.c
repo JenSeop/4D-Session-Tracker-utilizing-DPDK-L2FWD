@@ -260,7 +260,7 @@ uint32_t hash_table_use_cnt = 0;
 static uint32_t
 nstek_hash(Tuples tuple)
 {
-    uint32_t hash = 5381;
+    uint32_t hash = 0;
     hash = ((hash << 5) + hash) ^ (tuple.src_ip<<24) ^ (tuple.dst_ip<<24);
     hash = ((hash << 5) + hash) ^ (tuple.src_ip<<16) ^ (tuple.dst_ip<<16);
     hash = ((hash << 5) + hash) ^ (tuple.src_ip<<8) ^ (tuple.dst_ip<<8);

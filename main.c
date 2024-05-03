@@ -606,7 +606,7 @@ l2fwd_main_loop(void)
 				rte_prefetch0(rte_pktmbuf_mtod(m, void *));
 				l2fwd_simple_forward(m, portid);
                 /* START OF NSTEK MAIN LOOP */
-
+				
                 // CASTING
                 eth_hdr = rte_pktmbuf_mtod(m, struct rte_ether_hdr*);
                 ipv4_src = (uint8_t*)eth_hdr + sizeof(struct rte_ether_hdr);

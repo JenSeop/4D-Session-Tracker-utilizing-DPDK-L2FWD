@@ -173,6 +173,8 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
 {
     uint32_t hash_index = nstek_hash(tuple, depth);
 
+    if(depth > NSTEK_BUCKET_SIZE) eixt();
+
     if(hash_table[depth][hash_index].used != 0)
     {
         if(nstek_compare_session(tuple, hash_table[depth][hash_index].tuple))
@@ -184,8 +186,6 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
         else
         {
             hash_index = nstek_packet_to_session(tuple, traffic, depth + 1);
-            if(hash_index == 0)
-                return 0;
         }
     }
     else if(hash_table[depth][hash_index].used == 0)
@@ -196,7 +196,7 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
         nstek_depth_diff_calculator(depth, hash_index);
     }
 
-    return 0;
+    return hash_index;
 }
 
 static void
@@ -311,4 +311,24 @@ nstek_hash_table_free()
 
     free(hash_table);
     printf("[NSTEK] %d_DEPTH_HASH_TABLE Memory deallocation successful.\n", NSTEK_DEPTH);
+}
+
+int main(void)
+{
+    nstek_hash_table_init();
+
+    for(uint32_t idx = 1; idx < 255 * 255 * 2; idx++)
+    {
+        Tuples tuple1 = {16843009 + idx, 4294967295 - idx, 1024, 1025, 6};
+        Traffics traffic1 = {4, 4, 4};
+        nstek_packet_to_session(tuple1, traffic1, NSTEK_DEPTH_01);
+
+        Tuples tuple2 = {4294967295 - idx, 16843009 + idx, 1024, 1025, 6};
+        Traffics traffic2 = {4, 4, 4};
+        nstek_packet_to_session(tuple2, traffic2, NSTEK_DEPTH_01);
+    }
+
+    nstek_session_display();
+    
+    nstek_hash_table_free();
 }

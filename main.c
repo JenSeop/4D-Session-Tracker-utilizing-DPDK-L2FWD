@@ -363,7 +363,7 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
 {
     uint32_t hash_index = nstek_hash(tuple, depth);
 
-    if(depth > NSTEK_BUCKET_SIZE) eixt();
+    if(depth > NSTEK_DEPTH) eixt();
 
     if(hash_table[depth][hash_index].used != 0)
     {

@@ -467,12 +467,12 @@ nstek_hash_table_init()
         hash_table[depth] = (HashTables*)malloc(NSTEK_DEPTH_LN_CH(depth) * sizeof(HashTables));
         if(hash_table[depth] == NULL)
         {
-            printf("[NSTEK ERROR] DEPTH_%.2d [%.8d] %.3d MB Memory allocation failed.\n", depth + 1, NSTEK_DEPTH_LN_CH(depth), (sizeof(hash_table[depth][NSTEK_DEPTH_LN_CH(depth)]) * NSTEK_DEPTH_LN_CH(depth) / NSTEK_BYTE_TO_MB));
+            printf("[NSTEK ERROR] DEPTH_%.2d [%.8d] Memory allocation failed.\n", depth + 1, NSTEK_DEPTH_LN_CH(depth));
             exit(1);
         }
         else
         {
-            printf("[NSTEK] DEPTH_%.2d [%.8d] %.3d MB Memory allocation successful.\n", depth + 1, NSTEK_DEPTH_LN_CH(depth), (sizeof(hash_table[depth][NSTEK_DEPTH_LN_CH(depth)]) * NSTEK_DEPTH_LN_CH(depth) / NSTEK_BYTE_TO_MB));
+            printf("[NSTEK] DEPTH_%.2d [%.8d] Memory allocation successful.\n", depth + 1, NSTEK_DEPTH_LN_CH(depth));
         }
     }
 }
@@ -485,7 +485,7 @@ nstek_hash_table_free()
     for(depth = 0; depth < NSTEK_DEPTH; depth++)
     {
         free(hash_table[depth]);
-        printf("[NSTEK] DEPTH_%.2d [%.8d] %.3d MB Memory deallocation successful.\n", depth + 1, NSTEK_DEPTH_LN_CH(depth), (sizeof(hash_table[depth][NSTEK_DEPTH_LN_CH(depth)]) * NSTEK_DEPTH_LN_CH(depth) / NSTEK_BYTE_TO_MB));
+        printf("[NSTEK] DEPTH_%.2d [%.8d] Memory deallocation successful.\n", depth + 1, NSTEK_DEPTH_LN_CH(depth));
     }
 
     free(hash_table);

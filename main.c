@@ -438,20 +438,12 @@ nstek_session_display()
         }
     }
     printf(
-        "\n[Depth Capacity]\t(D-1) %u\t(D-2) %u\t(D-3) %u\t(D-4) %u",
+        "\n[Depth Capacity]\t(D-1) %u\t(D-2) %u\t(D-3) %u\t(D-4) %u\n",
         NSTEK_DEPTH_01_CNT,
         NSTEK_DEPTH_02_CNT,
         NSTEK_DEPTH_03_CNT,
         NSTEK_DEPTH_04_CNT
     );
-    printf(
-        "\n[Depth Load factor]\t(D-1) %f\t(D-2) %f\t(D-3) %f\t(D-4) %f",
-        (float) NSTEK_DEPTH_01_CNT / (float) NSTEK_DEPTH_01_LN * 100,
-        (float) NSTEK_DEPTH_02_CNT / (float) NSTEK_DEPTH_02_LN * 100,
-        (float) NSTEK_DEPTH_03_CNT / (float) NSTEK_DEPTH_03_LN * 100,
-        (float) NSTEK_DEPTH_04_CNT / (float) NSTEK_DEPTH_04_LN * 100
-    );
-    printf("\n\n");
 }
 
 static void

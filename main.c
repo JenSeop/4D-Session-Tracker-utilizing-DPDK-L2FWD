@@ -406,8 +406,12 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
 static void
 nstek_session_display()
 {
+	const char clr[] = { 27, '[', '2', 'J', '\0' };
+	const char topLeft[] = { 27, '[', '1', ';', '1', 'H','\0' };
     uint32_t hash_index;
     int depth;
+	
+	printf("%s%s", clr, topLeft);
 
     for(depth = 0; depth < NSTEK_DEPTH; depth++)
     {

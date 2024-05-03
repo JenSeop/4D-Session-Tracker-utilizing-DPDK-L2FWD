@@ -291,11 +291,6 @@ nstek_hash(Tuples tuple, int depth)
 {
     uint32_t hash = NSTEK_DEPTH_DR_CH(depth);
 	uint32_t size = NSTEK_DEPTH_LN_CH(depth);
-	if(hash == 0 || size == 0)
-	{
-		hash = NSTEK_DEPTH_DR_CH(depth);
-		hash = NSTEK_DEPTH_LN_CH(depth);
-	}
     
     hash = (~hash * ~(tuple.src_addr * tuple.dst_addr)) >> (~depth + tuple.protocol);
     hash = (~hash * ~(~tuple.src_port * ~tuple.dst_port)) >> (~depth + tuple.protocol);
@@ -370,7 +365,10 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
     uint32_t hash_index = nstek_hash(tuple, depth);
 
     if(depth > NSTEK_DEPTH)
+	{
+		printf("ERROR!\n");
 		exit(1);
+	}
 
     if(hash_table[depth][hash_index].used != 0)
     {

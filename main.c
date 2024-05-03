@@ -260,16 +260,6 @@ uint32_t NSTEK_DEPTH_02_CNT = 0;
 uint32_t NSTEK_DEPTH_03_CNT = 0;
 uint32_t NSTEK_DEPTH_04_CNT = 0;
 
-uint32_t NSTEK_DEPTH_01_AVG = 0;
-uint32_t NSTEK_DEPTH_02_AVG = 0;
-uint32_t NSTEK_DEPTH_03_AVG = 0;
-uint32_t NSTEK_DEPTH_04_AVG = 0;
-
-uint32_t NSTEK_DEPTH_01_DIF = 0;
-uint32_t NSTEK_DEPTH_02_DIF = 0;
-uint32_t NSTEK_DEPTH_03_DIF = 0;
-uint32_t NSTEK_DEPTH_04_DIF = 0;
-
 /*
     NSTEK_HASH
     Standard Multiplicative Hashing Custom Model
@@ -355,19 +345,15 @@ nstek_depth_diff_calculator(int depth, uint32_t hash_index)
     {
         case NSTEK_DEPTH_01:
             NSTEK_DEPTH_01_CNT += 1;
-            NSTEK_DEPTH_01_AVG = hash_index ? (NSTEK_DEPTH_01_AVG + hash_index) / 2 : 0;
             break;
         case NSTEK_DEPTH_02:
             NSTEK_DEPTH_02_CNT += 1;
-            NSTEK_DEPTH_02_AVG = hash_index ? (NSTEK_DEPTH_02_AVG + hash_index) / 2 : 0;
             break;
         case NSTEK_DEPTH_03:
             NSTEK_DEPTH_03_CNT += 1;
-            NSTEK_DEPTH_03_AVG = hash_index ? (NSTEK_DEPTH_03_AVG + hash_index) / 2 : 0;
             break;
         case NSTEK_DEPTH_04:
             NSTEK_DEPTH_04_CNT += 1;
-            NSTEK_DEPTH_04_AVG = hash_index ? (NSTEK_DEPTH_04_AVG + hash_index) / 2 : 0;
             break;
     }
 }
@@ -464,13 +450,6 @@ nstek_session_display()
         (float) NSTEK_DEPTH_02_CNT / (float) NSTEK_DEPTH_02_LN * 100,
         (float) NSTEK_DEPTH_03_CNT / (float) NSTEK_DEPTH_03_LN * 100,
         (float) NSTEK_DEPTH_04_CNT / (float) NSTEK_DEPTH_04_LN * 100
-    );
-    printf(
-        "\n[Depth Hash AVG]\t(D-1) %u\t(D-2) %u\t(D-3) %u\t(D-4) %u",
-        NSTEK_DEPTH_01_AVG,
-        NSTEK_DEPTH_02_AVG,
-        NSTEK_DEPTH_03_AVG,
-        NSTEK_DEPTH_04_AVG
     );
     printf("\n\n");
 }

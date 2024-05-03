@@ -293,6 +293,11 @@ nstek_hash(Tuples tuple, int depth)
     
     hash = (~hash * ~(tuple.src_addr * tuple.dst_addr)) >> (~depth + tuple.protocol);
     hash = (~hash * ~(~tuple.src_port * ~tuple.dst_port)) >> (~depth + tuple.protocol);
+	if(hash == 0)
+	{
+		printf("hash error!\n");
+		exit(1);
+	}
     hash = hash % NSTEK_DEPTH_LN_CH(depth);
 
     return hash;

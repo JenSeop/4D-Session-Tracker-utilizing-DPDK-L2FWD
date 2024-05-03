@@ -567,6 +567,7 @@ l2fwd_main_loop(void)
 			portid);
 
 	}
+	nstek_hash_table_init();
 
 	while (!force_quit) {
 
@@ -657,14 +658,13 @@ l2fwd_main_loop(void)
 			/* >8 End of read packet from RX queues. */
 		}
 	}
+	nstek_hash_table_free();
 }
 
 static int
 l2fwd_launch_one_lcore(__rte_unused void *dummy)
 {
-	nstek_hash_table_init();
 	l2fwd_main_loop();
-	nstek_hash_table_free();
 	return 0;
 }
 

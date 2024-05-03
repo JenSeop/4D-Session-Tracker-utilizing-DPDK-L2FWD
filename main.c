@@ -363,6 +363,8 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
 {
     uint32_t hash_index = nstek_hash(tuple, depth);
 
+    if(depth > NSTEK_BUCKET_SIZE) eixt();
+
     if(hash_table[depth][hash_index].used != 0)
     {
         if(nstek_compare_session(tuple, hash_table[depth][hash_index].tuple))
@@ -374,8 +376,6 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
         else
         {
             hash_index = nstek_packet_to_session(tuple, traffic, depth + 1);
-            if(hash_index == 0)
-                return 0;
         }
     }
     else if(hash_table[depth][hash_index].used == 0)
@@ -386,7 +386,7 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
         nstek_depth_diff_calculator(depth, hash_index);
     }
 
-    return 0;
+    return hash_index;
 }
 
 static void

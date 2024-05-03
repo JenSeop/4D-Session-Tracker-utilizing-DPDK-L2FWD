@@ -225,8 +225,8 @@ l2fwd_simple_forward(struct rte_mbuf *m, unsigned portid)
 
 #define NSTEK_BYTE_TO_MB 1048576
 
-#define NSTEK_DEPTH_LN_CH(n) ((n == 0) ? NSTEK_DEPTH_01_LN : (n == 1) ? NSTEK_DEPTH_02_LN : (n == 2) ? NSTEK_DEPTH_03_LN : (n == 3) ? NSTEK_DEPTH_04_LN : 0)
-#define NSTEK_DEPTH_DR_CH(n) ((n == 0) ? NSTEK_DEPTH_01_DR : (n == 1) ? NSTEK_DEPTH_02_DR : (n == 2) ? NSTEK_DEPTH_03_DR : (n == 3) ? NSTEK_DEPTH_04_DR : 0)
+#define NSTEK_DEPTH_LN_CH(n) ((n == 0) ? NSTEK_DEPTH_01_LN : (n == 1) ? NSTEK_DEPTH_02_LN : (n == 2) ? NSTEK_DEPTH_03_LN : (n == 3) ? NSTEK_DEPTH_04_LN : 1)
+#define NSTEK_DEPTH_DR_CH(n) ((n == 0) ? NSTEK_DEPTH_01_DR : (n == 1) ? NSTEK_DEPTH_02_DR : (n == 2) ? NSTEK_DEPTH_03_DR : (n == 3) ? NSTEK_DEPTH_04_DR : 1)
 #define NSTEK_PROTOCOL(n) ((n) == 1 ? "ICMP" : (n) == 2 ? "IGMP" : (n) == 6 ? "TCP" : (n) == 17 ? "UDP" : (n) == 114 ? "Any 0-hop" : "N/A")
 #define NSTEK_REV_ENDIAN(n) ((uint16_t)(((n) >> 8) | (n) << 8))
 
@@ -290,15 +290,16 @@ static uint32_t
 nstek_hash(Tuples tuple, int depth)
 {
     uint32_t hash = NSTEK_DEPTH_DR_CH(depth);
+	uint32_t size = NSTEK_DEPTH_LN_CH(depth);
+	if(hash == 0 || size == 0)
+	{
+		hash = NSTEK_DEPTH_DR_CH(depth);
+		hash = NSTEK_DEPTH_LN_CH(depth);
+	}
     
     hash = (~hash * ~(tuple.src_addr * tuple.dst_addr)) >> (~depth + tuple.protocol);
     hash = (~hash * ~(~tuple.src_port * ~tuple.dst_port)) >> (~depth + tuple.protocol);
-	if(hash == 0)
-	{
-		printf("hash error!\n");
-		exit(1);
-	}
-    hash = hash % NSTEK_DEPTH_LN_CH(depth);
+    hash = hash % size;
 
     return hash;
 }
@@ -389,7 +390,7 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
         hash_table[depth][hash_index].used = 1;
         nstek_tuple_distributor(depth, hash_index, tuple);
         nstek_traffic_distributor(depth, hash_index, traffic);
-        nstek_depth_diff_calculator(depth, hash_index);
+        //nstek_depth_diff_calculator(depth, hash_index);
     }
 
     return hash_index;
@@ -443,7 +444,7 @@ nstek_session_display()
             }
         }
     }
-    printf(
+	printf(
         "\n[Depth Capacity]\t(D-1) %u\t(D-2) %u\t(D-3) %u\t(D-4) %u\n",
         NSTEK_DEPTH_01_CNT,
         NSTEK_DEPTH_02_CNT,

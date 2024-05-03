@@ -363,7 +363,8 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
 {
     uint32_t hash_index = nstek_hash(tuple, depth);
 
-    if(depth > NSTEK_DEPTH) eixt();
+    if(depth > NSTEK_DEPTH)
+		exit(1);
 
     if(hash_table[depth][hash_index].used != 0)
     {
@@ -542,7 +543,6 @@ l2fwd_main_loop(void)
 			portid);
 
 	}
-	nstek_hash_table_init();
 
 	while (!force_quit) {
 
@@ -633,7 +633,6 @@ l2fwd_main_loop(void)
 			/* >8 End of read packet from RX queues. */
 		}
 	}
-	nstek_hash_table_free();
 }
 
 static int
@@ -987,6 +986,7 @@ signal_handler(int signum)
 int
 main(int argc, char **argv)
 {
+	nstek_hash_table_init();
 	struct lcore_queue_conf *qconf;
 	int ret;
 	uint16_t nb_ports;
@@ -1262,6 +1262,7 @@ main(int argc, char **argv)
 		printf(" Done\n");
 	}
 
+	nstek_hash_table_free();
 	/* clean up the EAL */
 	rte_eal_cleanup();
 	printf("Bye...\n");

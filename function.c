@@ -200,7 +200,7 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
 }
 
 static void
-nstek_session_dsplay()
+nstek_session_display()
 {
     uint32_t hash_index;
     int depth;

@@ -89,6 +89,7 @@ uint32_t NSTEK_DEPTH_04_DIF = 0;
     DEPTH AVERAGE COLLISION PERCENT 0.55% 
 
     240502 - 652M - 4D - 0.0026605151864667435
+    240503 - 942M - 4D - 0.028827108936881042
 */
 
 static uint32_t
@@ -310,21 +311,4 @@ nstek_hash_table_free()
 
     free(hash_table);
     printf("[NSTEK] %d_DEPTH_HASH_TABLE Memory deallocation successful.\n", NSTEK_DEPTH);
-}
-
-int main(void)
-{
-
-    nstek_hash_table_init();
-
-    for(uint32_t idx = 0; idx < 255 * 255 * 145; idx++) // 9,428,625
-    {
-        Tuples tuple1 = {16843008 + idx, 16843011 + idx, 1024, 1025, 6};
-        Traffics traffic = {4, 4, 4};
-        nstek_packet_to_session(tuple1, traffic, NSTEK_DEPTH_01);
-    }
-
-    nstek_session_dsplay();
-
-    nstek_hash_table_free();
 }

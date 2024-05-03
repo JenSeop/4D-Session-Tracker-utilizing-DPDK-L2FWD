@@ -355,19 +355,19 @@ nstek_depth_diff_calculator(int depth, uint32_t hash_index)
     {
         case NSTEK_DEPTH_01:
             NSTEK_DEPTH_01_CNT += 1;
-            NSTEK_DEPTH_01_AVG = (NSTEK_DEPTH_01_AVG + hash_index) / 2;
+            NSTEK_DEPTH_01_AVG = hash_index ? (NSTEK_DEPTH_01_AVG + hash_index) / 2 : 0;
             break;
         case NSTEK_DEPTH_02:
             NSTEK_DEPTH_02_CNT += 1;
-            NSTEK_DEPTH_02_AVG = (NSTEK_DEPTH_02_AVG + hash_index) / 2;
+            NSTEK_DEPTH_02_AVG = hash_index ? (NSTEK_DEPTH_02_AVG + hash_index) / 2 : 0;
             break;
         case NSTEK_DEPTH_03:
             NSTEK_DEPTH_03_CNT += 1;
-            NSTEK_DEPTH_03_AVG = (NSTEK_DEPTH_03_AVG + hash_index) / 2;
+            NSTEK_DEPTH_03_AVG = hash_index ? (NSTEK_DEPTH_03_AVG + hash_index) / 2 : 0;
             break;
         case NSTEK_DEPTH_04:
             NSTEK_DEPTH_04_CNT += 1;
-            NSTEK_DEPTH_04_AVG = (NSTEK_DEPTH_04_AVG + hash_index) / 2;
+            NSTEK_DEPTH_04_AVG = hash_index ? (NSTEK_DEPTH_04_AVG + hash_index) / 2 : 0;
             break;
     }
 }
@@ -410,7 +410,7 @@ nstek_session_display()
 	const char topLeft[] = { 27, '[', '1', ';', '1', 'H','\0' };
     uint32_t hash_index;
     int depth;
-	
+
 	printf("%s%s", clr, topLeft);
 
     for(depth = 0; depth < NSTEK_DEPTH; depth++)

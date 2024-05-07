@@ -9,10 +9,10 @@
 #define NSTEK_DEPTH_03 2
 #define NSTEK_DEPTH_04 3
 
-#define NSTEK_DEPTH_01_LN 20000003
-#define NSTEK_DEPTH_02_LN 10000019
-#define NSTEK_DEPTH_03_LN 5000011
-#define NSTEK_DEPTH_04_LN 2500009
+#define NSTEK_DEPTH_01_LN 16777216
+#define NSTEK_DEPTH_02_LN 8388608
+#define NSTEK_DEPTH_03_LN 4194304
+#define NSTEK_DEPTH_04_LN 2097152
 
 #define NSTEK_DEPTH_01_DR 11
 #define NSTEK_DEPTH_02_DR 13
@@ -91,6 +91,32 @@ uint32_t NSTEK_DEPTH_04_DIF = 0;
     240502 - 652M - 4D - 0.0026605151864667435
     240503 - 942M - 4D - 0.028827108936881042
 */
+
+static uint32_t
+nstek_hash(Tuples tuple, int depth)
+{
+    uint32_t hash = 0;
+    
+    // src_addr의 앞 2옥텟과 dst_addr의 뒤 2옥텟을 XOR 연산
+    hash = (hash >> 3) ^ (tuple.src_addr >> 16) ^ (tuple.dst_addr & 0xFFFF);
+    
+    // src_addr의 뒤 2옥텟과 dst_addr의 앞 2옥텟을 XOR 연산
+    hash = (hash >> 3) ^ (tuple.src_addr & 0xFFFF) ^ (tuple.dst_addr >> 16);
+    
+    // src_port의 앞 1옥텟과 dst_port의 뒤 1옥텟을 XOR 연산
+    hash = (hash >> 3) ^ (tuple.src_port >> 8) ^ (tuple.dst_port & 0xFF);
+    
+    // src_port의 뒤 1옥텟과 dst_port의 앞 1옥텟을 XOR 연산
+    hash = (hash >> 3) ^ (tuple.src_port & 0xFF) ^ (tuple.dst_port >> 8);
+    
+    // 기존의 hash 값에 프로토콜을 XOR 연산
+    hash = (hash >> 3) ^ tuple.protocol;
+
+    // 해시 테이블의 크기에 맞게 조정
+    hash = (hash >> 3) & NSTEK_DEPTH_LN_CH(depth);
+
+    return hash;
+}
 
 static uint32_t
 nstek_hash(Tuples tuple, int depth)

@@ -66,8 +66,6 @@ uint32_t NSTEK_DEPTH_02_DIF = 0;
 uint32_t NSTEK_DEPTH_03_DIF = 0;
 uint32_t NSTEK_DEPTH_04_DIF = 0;
 
-int idx;
-
 /*
     NSTEK_HASH
     Standard Multiplicative Hashing Custom Model
@@ -199,16 +197,10 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth, uint32_t brac
         }
         else
         {
-            printf("COL HASH = %u DEPTH = %d BRACE = %u\n",hash_index,depth,brace);
             if(depth < NSTEK_DEPTH)
-            {
                 hash_index = nstek_packet_to_session(tuple, traffic, depth + 1, brace);
-            }
             else
-            {
-                printf("BRACE!!\n");
                 hash_index = nstek_packet_to_session(tuple, traffic, NSTEK_DEPTH_01, brace + 1);
-            }
         }
     }
     else if(hash_table[depth][hash_index].used == 0)
@@ -340,11 +332,11 @@ int main(void)
 {
     nstek_hash_table_init();
 
-    for(idx = 0; idx < 255 * 255; idx++)
+    for(uint32_t idx = 0; idx < 255 * 255; idx++)
     {
         Tuples tuple1 = {16843009 + idx, 16843009 + idx, 1024, 1025, 6};
         Traffics traffic1 = {4, 4, 4};
-        printf("%u\n",nstek_packet_to_session(tuple1, traffic1, NSTEK_DEPTH_01, 0));
+        nstek_packet_to_session(tuple1, traffic1, NSTEK_DEPTH_01, 0);
     }
 
     nstek_session_display();

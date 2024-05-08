@@ -298,12 +298,13 @@ static uint32_t
 nstek_hash(Tuples tuple, int depth, uint32_t brace)
 {
     uint32_t hash = (NSTEK_DEPTH_DR_CH(depth) >> brace);
-    
+    uint32_t size = (NSTEK_DEPTH_LN_CH(depth) - 1);
+
     hash ^= ((tuple.src_addr >> 16) + (tuple.dst_addr & 0xFFFF)) >> (~depth + tuple.protocol);
     hash ^= (tuple.src_addr & 0xFFFF) ^ (tuple.dst_addr >> 16) >> (~depth + tuple.protocol);
     hash ^= ((tuple.src_port >> 8) + (tuple.dst_port & 0xFF)) >> (~depth + tuple.protocol);
     hash ^= (tuple.src_port & 0xFF) ^ (tuple.dst_port >> 8) >> (~depth + tuple.protocol);
-    hash &= (NSTEK_DEPTH_LN_CH(depth) - 1);
+    hash = hash & size;
     
     return hash;
 }
@@ -349,15 +350,9 @@ nstek_tuple_distributor(int depth, uint32_t hash_index, Tuples tuple)
 }
 
 static int
-nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
+nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth, uint32_t brace)
 {
-    uint32_t hash_index = nstek_hash(tuple, depth);
-
-    if(depth > NSTEK_DEPTH)
-	{
-		printf("ERROR!\n");
-		exit(1);
-	}
+    uint32_t hash_index = nstek_hash(tuple, depth, brace);
 
     if(hash_table[depth][hash_index].used != 0)
     {
@@ -369,7 +364,10 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
         }
         else
         {
-            hash_index = nstek_packet_to_session(tuple, traffic, depth + 1);
+            if(depth < NSTEK_DEPTH)
+                hash_index = nstek_packet_to_session(tuple, traffic, depth + 1, brace);
+            else
+                hash_index = nstek_packet_to_session(tuple, traffic, NSTEK_DEPTH_01, brace + 1);
         }
     }
     else if(hash_table[depth][hash_index].used == 0)
@@ -377,6 +375,7 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
         hash_table[depth][hash_index].used = 1;
         nstek_tuple_distributor(depth, hash_index, tuple);
         nstek_traffic_distributor(depth, hash_index, traffic);
+        nstek_depth_diff_calculator(depth, hash_index);
     }
 
     return hash_index;
@@ -611,7 +610,7 @@ l2fwd_main_loop(void)
                 traffic.dr = port_statistics[portid].dropped;
 
 				// CREATE DATA
-				nstek_packet_to_session(tuple, traffic, NSTEK_DEPTH_01);
+				nstek_packet_to_session(tuple, traffic, NSTEK_DEPTH_01, 0);
 
                 /* END OF NSTEK MAIN LOOP */
 			}

@@ -282,14 +282,14 @@ HashTables **hash_table;
 */
 
 static uint32_t
-nstek_hash_mul(Tuples tuple, int depth)
+nstek_hash(Tuples tuple, int depth, uint32_t brace)
 {
-    uint32_t hash = NSTEK_DEPTH_DR_CH(depth);
+    uint32_t hash = (NSTEK_DEPTH_DR_CH(depth) >> brace);
 	uint32_t size = NSTEK_DEPTH_LN_CH(depth);
     
     hash = (~hash * ~(tuple.src_addr * tuple.dst_addr)) >> (~depth + tuple.protocol);
     hash = (~hash * ~(~tuple.src_port * ~tuple.dst_port)) >> (~depth + tuple.protocol);
-    hash = hash % size;
+    hash = (hash % size);
 
     return hash;
 }

@@ -93,20 +93,20 @@ uint32_t NSTEK_DEPTH_04_DIF = 0;
 */
 
 static uint32_t
-nstek_hash_mul(Tuples tuple, int depth)
+nstek_hash(Tuples tuple, int depth, uint32_t brace)
 {
-    uint32_t hash = NSTEK_DEPTH_DR_CH(depth);
+    uint32_t hash = (NSTEK_DEPTH_DR_CH(depth) >> brace);
 	uint32_t size = NSTEK_DEPTH_LN_CH(depth);
     
     hash = (~hash * ~(tuple.src_addr * tuple.dst_addr)) >> (~depth + tuple.protocol);
     hash = (~hash * ~(~tuple.src_port * ~tuple.dst_port)) >> (~depth + tuple.protocol);
-    hash = hash % size;
+    hash = (hash % size);
 
     return hash;
 }
 
 static uint32_t
-nstek_hash(Tuples tuple, int depth, uint32_t brace)
+nstek_hash__a(Tuples tuple, int depth, uint32_t brace)
 {
     uint32_t hash = (NSTEK_DEPTH_DR_CH(depth) >> brace);
     uint32_t size = (NSTEK_DEPTH_LN_CH(depth) - 1);
@@ -115,7 +115,7 @@ nstek_hash(Tuples tuple, int depth, uint32_t brace)
     hash ^= (tuple.src_addr & 0xFFFF) ^ (tuple.dst_addr >> 16) >> (~depth + tuple.protocol);
     hash ^= ((tuple.src_port >> 8) + (tuple.dst_port & 0xFF)) >> (~depth + tuple.protocol);
     hash ^= (tuple.src_port & 0xFF) ^ (tuple.dst_port >> 8) >> (~depth + tuple.protocol);
-    hash = hash & size;
+    hash = (hash & size);
     
     return hash;
 }

@@ -14,10 +14,10 @@
 #define NSTEK_DEPTH_03_LN 4194304
 #define NSTEK_DEPTH_04_LN 2097152
 
-#define NSTEK_DEPTH_01_DR 11
-#define NSTEK_DEPTH_02_DR 13
-#define NSTEK_DEPTH_03_DR 17
-#define NSTEK_DEPTH_04_DR 29
+#define NSTEK_DEPTH_01_DR 16777213
+#define NSTEK_DEPTH_02_DR 8388593
+#define NSTEK_DEPTH_03_DR 4194301
+#define NSTEK_DEPTH_04_DR 2097143
 
 #define NSTEK_BYTE_TO_MB 1048576
 
@@ -66,6 +66,8 @@ uint32_t NSTEK_DEPTH_02_DIF = 0;
 uint32_t NSTEK_DEPTH_03_DIF = 0;
 uint32_t NSTEK_DEPTH_04_DIF = 0;
 
+int idx;
+
 /*
     NSTEK_HASH
     Standard Multiplicative Hashing Custom Model
@@ -93,39 +95,27 @@ uint32_t NSTEK_DEPTH_04_DIF = 0;
 */
 
 static uint32_t
-nstek_hash(Tuples tuple, int depth)
+nstek_hash(Tuples tuple, int depth, uint32_t brace)
 {
-    uint32_t hash = 0;
+    uint32_t hash = (NSTEK_DEPTH_DR_CH(depth) >> brace);
     
-    // src_addr의 앞 2옥텟과 dst_addr의 뒤 2옥텟을 XOR 연산
-    hash = (hash >> 3) ^ (tuple.src_addr >> 16) ^ (tuple.dst_addr & 0xFFFF);
+    hash ^= ((tuple.src_addr >> 16) + (tuple.dst_addr & 0xFFFF)) >> (~depth + tuple.protocol);
+    hash ^= (tuple.src_addr & 0xFFFF) ^ (tuple.dst_addr >> 16) >> (~depth + tuple.protocol);
+    hash ^= ((tuple.src_port >> 8) + (tuple.dst_port & 0xFF)) >> (~depth + tuple.protocol);
+    hash ^= (tuple.src_port & 0xFF) ^ (tuple.dst_port >> 8) >> (~depth + tuple.protocol);
+    hash = hash & (NSTEK_DEPTH_LN_CH(depth) - 1);
     
-    // src_addr의 뒤 2옥텟과 dst_addr의 앞 2옥텟을 XOR 연산
-    hash = (hash >> 3) ^ (tuple.src_addr & 0xFFFF) ^ (tuple.dst_addr >> 16);
-    
-    // src_port의 앞 1옥텟과 dst_port의 뒤 1옥텟을 XOR 연산
-    hash = (hash >> 3) ^ (tuple.src_port >> 8) ^ (tuple.dst_port & 0xFF);
-    
-    // src_port의 뒤 1옥텟과 dst_port의 앞 1옥텟을 XOR 연산
-    hash = (hash >> 3) ^ (tuple.src_port & 0xFF) ^ (tuple.dst_port >> 8);
-    
-    // 기존의 hash 값에 프로토콜을 XOR 연산
-    hash = (hash >> 3) ^ tuple.protocol;
-
-    // 해시 테이블의 크기에 맞게 조정
-    hash = (hash >> 3) & NSTEK_DEPTH_LN_CH(depth);
-
     return hash;
 }
 
 static uint32_t
-nstek_hash(Tuples tuple, int depth)
+nstek_hash_mul(Tuples tuple, int depth, uint32_t brace)
 {
     uint32_t hash = NSTEK_DEPTH_DR_CH(depth);
     
     hash = (~hash * ~(tuple.src_addr * tuple.dst_addr)) >> (~depth + tuple.protocol);
     hash = (~hash * ~(~tuple.src_port * ~tuple.dst_port)) >> (~depth + tuple.protocol);
-    hash = hash % NSTEK_DEPTH_LN_CH(depth);
+    hash = (hash >> brace) % NSTEK_DEPTH_LN_CH(depth);
 
     return hash;
 }
@@ -195,11 +185,9 @@ nstek_depth_diff_calculator(int depth, uint32_t hash_index)
 }
 
 static int
-nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
+nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth, uint32_t brace)
 {
-    uint32_t hash_index = nstek_hash(tuple, depth);
-
-    if(depth > NSTEK_DEPTH) eixt();
+    uint32_t hash_index = nstek_hash(tuple, depth, brace);
 
     if(hash_table[depth][hash_index].used != 0)
     {
@@ -211,7 +199,16 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth)
         }
         else
         {
-            hash_index = nstek_packet_to_session(tuple, traffic, depth + 1);
+            printf("COL HASH = %u DEPTH = %d BRACE = %u\n",hash_index,depth,brace);
+            if(depth < NSTEK_DEPTH)
+            {
+                hash_index = nstek_packet_to_session(tuple, traffic, depth + 1, brace);
+            }
+            else
+            {
+                printf("BRACE!!\n");
+                hash_index = nstek_packet_to_session(tuple, traffic, NSTEK_DEPTH_01, brace + 1);
+            }
         }
     }
     else if(hash_table[depth][hash_index].used == 0)
@@ -343,15 +340,11 @@ int main(void)
 {
     nstek_hash_table_init();
 
-    for(uint32_t idx = 1; idx < 255 * 255 * 2; idx++)
+    for(idx = 0; idx < 255 * 255; idx++)
     {
-        Tuples tuple1 = {16843009 + idx, 4294967295 - idx, 1024, 1025, 6};
+        Tuples tuple1 = {16843009 + idx, 16843009 + idx, 1024, 1025, 6};
         Traffics traffic1 = {4, 4, 4};
-        nstek_packet_to_session(tuple1, traffic1, NSTEK_DEPTH_01);
-
-        Tuples tuple2 = {4294967295 - idx, 16843009 + idx, 1024, 1025, 6};
-        Traffics traffic2 = {4, 4, 4};
-        nstek_packet_to_session(tuple2, traffic2, NSTEK_DEPTH_01);
+        printf("%u\n",nstek_packet_to_session(tuple1, traffic1, NSTEK_DEPTH_01, 0));
     }
 
     nstek_session_display();

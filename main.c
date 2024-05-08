@@ -375,7 +375,6 @@ nstek_packet_to_session(Tuples tuple, Traffics traffic, int depth, uint32_t brac
         hash_table[depth][hash_index].used = 1;
         nstek_tuple_distributor(depth, hash_index, tuple);
         nstek_traffic_distributor(depth, hash_index, traffic);
-        nstek_depth_diff_calculator(depth, hash_index);
     }
 
     return hash_index;
